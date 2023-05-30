@@ -2,6 +2,7 @@ import pytest
 
 from pymarc import Field, Record, Subfield
 
+
 @pytest.fixture
 def stub_title_no_number():
     return Field(
@@ -9,9 +10,10 @@ def stub_title_no_number():
         indicators=["1", "0"],
         subfields=[
             Subfield(code="a", value="Foo /"),
-            Subfield(code="c", value="Spam.")
-        ]
+            Subfield(code="c", value="Spam."),
+        ],
     )
+
 
 @pytest.fixture
 def stub_title_with_number():
@@ -22,6 +24,18 @@ def stub_title_with_number():
             Subfield(code="a", value="Foo :"),
             Subfield(code="b", value="bar."),
             Subfield(code="n", value="Book 3 /"),
-            Subfield(code="c", value="by John Smith.")
-        ]
+            Subfield(code="c", value="by John Smith."),
+        ],
+    )
+
+
+@pytest.fixture
+def stub_240():
+    return Field(
+        tag="240",
+        indicators=["1", "0"],
+        subfields=[
+            Subfield(code="a", value="Foo."),
+            Subfield(code="l", value="English"),
+        ],
     )
