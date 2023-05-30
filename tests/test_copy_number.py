@@ -1,6 +1,6 @@
 import pytest
 
-from copy_number import get_number, find_digits, normalize_value
+from copy_number import get_number, find_digits, normalize_value, modify_uniform_title
 
 
 @pytest.mark.parametrize(
@@ -44,3 +44,13 @@ def test_get_number_no_subfield(stub_title_no_number):
 )
 def test_find_digits(arg, expectation):
     assert (find_digits(arg)) == expectation
+
+
+def test_modify_uniform_title_missing_240(stub_title_with_number):
+    with pytest.raises(ValueError):
+        modify_uniform_title("5", stub_title_with_number)
+
+
+def test_modify_uniform_title(stub_240):
+    field = modify_uniform_title("5", stub_240, 1)
+    print(field)
