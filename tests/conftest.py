@@ -4,7 +4,7 @@ from pymarc import Field, Record, Subfield
 
 
 @pytest.fixture
-def stub_title_no_number():
+def stub_245_no_number():
     return Field(
         tag="245",
         indicators=["1", "0"],
@@ -16,7 +16,7 @@ def stub_title_no_number():
 
 
 @pytest.fixture
-def stub_title_with_number():
+def stub_245_with_number():
     return Field(
         tag="245",
         indicators=["1", "0"],
