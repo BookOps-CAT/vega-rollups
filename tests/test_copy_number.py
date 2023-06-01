@@ -1,6 +1,36 @@
 import pytest
 
-from copy_number import get_number, find_digits, normalize_value, modify_uniform_title
+from pymarc import Field
+
+from copy_number import (
+    find_digits,
+    get_number,
+    has_complex_subfields,
+    normalize_value,
+    modify_uniform_title,
+)
+
+
+@pytest.mark.parametrize(
+    "arg,expectation",
+    [
+        ("d", True),
+        ("f", True),
+        ("g", True),
+        ("h", True),
+        ("k", True),
+        ("m", True),
+        ("n", True),
+        ("o", True),
+        ("p", True),
+        ("r", True),
+        ("s", True),
+        ("a", False),
+        ("l", False),
+    ],
+)
+def test_has_complex_subfields(arg, expectation):
+    assert has_complex_subfields(arg) == expectation
 
 
 @pytest.mark.parametrize(
