@@ -4,6 +4,7 @@ from pymarc import Field, Subfield
 
 from copy_number import (
     complex_subfield_n,
+    determine_subfield_n_position,
     find_digits,
     get_number,
     has_complex_subfields,
@@ -27,6 +28,7 @@ from copy_number import (
         ("Book 3.", False),
         ("Vol. 5", False),
         ("Vol. 55 /", False),
+        ("[Vol 45].", False)
 
     ])
 def test_complex_subfield_n(arg, expectation):
@@ -80,6 +82,15 @@ def test_has_single_subfield_n_multiple(stub_245_with_number):
 )
 def test_normalize_value(arg, expectation):
     assert normalize_value(arg) == expectation
+
+
+def determine_subfield_n_position_if_no_sub_6(stub_240):
+    assert determine_subfield_n_position(stub_240) == 1
+
+def determine_subfield_n_position_if_sub_6_present(stub_240):
+    stub_240.subfields.insert(0, Subfield("6", "spam"))
+
+    assert determine_subfield_n_position(stub_240) == 2
 
 
 def test_get_number_invalid_tag(stub_245_no_number):

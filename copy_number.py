@@ -55,6 +55,12 @@ def get_number(field: Field) -> Optional[str]:
     else:
         return None
 
+def determine_subfield_n_position(field: Field) -> int:
+    if "6" in field:
+        return 2
+    else:
+        return 1
+
 
 def modify_uniform_title(number: str, field: Field) -> Field:
     """
@@ -68,5 +74,6 @@ def modify_uniform_title(number: str, field: Field) -> Field:
     elif not number:
         return None
     else:
-        field.add_subfield("n", f"{number}.", 1)
+        pos = determine_subfield_n_position(field)
+        field.add_subfield("n", f"{number}.", pos)
         return field
