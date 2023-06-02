@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 from pymarc import Field
@@ -11,15 +12,33 @@ def has_complex_subfields(field: Field) -> bool:
     return False
 
 
+def has_single_subfield_n(field: Field) -> bool:
+    subs = field.get_subfields("n")
+    if len(subs) == 1:
+        return True
+    else:
+        return False
+
 def normalize_value(value: str) -> str:
     return "".join(x for x in value if x.isalnum())
 
 
+def complex_subfield_n(value: str) -> bool:
+    match = re.match(r".*\d+\D+\d+|^\D+$", value)
+    if match:
+        return True
+    else:
+        return False
+
+
 def find_digits(value: str) -> str:
-    for c in value.split(" "):
-        norm_c = normalize_value(c)
-        if norm_c.isdigit():
-            return norm_c
+    if complex_subfield_n(value):
+        return None
+    else:
+        for c in value.split(" "):
+            norm_c = normalize_value(c)
+            if norm_c.isdigit():
+                return norm_c
 
 
 def get_number(field: Field) -> Optional[str]:
@@ -29,11 +48,11 @@ def get_number(field: Field) -> Optional[str]:
     if field.tag != "245":
         raise ValueError("Invalid MARC tag passed. Only 245 is accepted.")
 
-    try:
+    if has_single_subfield_n(field):
         number = field["n"]
         number = find_digits(number)
         return number
-    except KeyError:
+    else:
         return None
 
 
