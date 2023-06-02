@@ -133,6 +133,13 @@ def test_modify_uniform_title(stub_240):
     assert str(field) == "=240  10$aFoo.$n5.$lEnglish"
 
 
+def test_modifify_uniform_title_when_subfield_6_present(stub_240):
+    stub_240.subfields.insert(0, Subfield("6", "bar"))
+    field = modify_uniform_title("5", stub_240)
+
+    assert str(field) == "=240  10$6bar$aFoo.$n5.$lEnglish"
+
+
 def test_modify_uniform_title_when_field_is_None():
     with pytest.raises(AttributeError):
         assert modify_uniform_title(5, None)
