@@ -1,7 +1,18 @@
 import re
 from typing import Optional
 
-from pymarc import Field
+from pymarc import Field, Subfield
+
+
+def add_custom_load_table_command(load_table: str) -> Field:
+    if not load_table:
+        raise ValueError("load_table argument cannot be empty.")
+
+    return Field(
+        tag="949",
+        indicators=[" ", " "],
+        subfields=[Subfield("a", f"*recs={load_table};")],
+    )
 
 
 def has_complex_subfields(field: Field) -> bool:
@@ -18,6 +29,7 @@ def has_single_subfield_n(field: Field) -> bool:
         return True
     else:
         return False
+
 
 def normalize_value(value: str) -> str:
     return "".join(x for x in value if x.isalnum())
@@ -55,6 +67,7 @@ def get_number(field: Field) -> Optional[str]:
     else:
         return None
 
+
 def determine_subfield_n_position(field: Field) -> int:
     if "6" in field:
         return 2
@@ -62,10 +75,12 @@ def determine_subfield_n_position(field: Field) -> int:
         return 1
 
 
-def modify_uniform_title(number: str, field: Field) -> Field:
+def modify_uniform_title(number: str, field: Field) -> Optional[Field]:
     """
     Inserts number into the subfield $n of 240 field
     """
+    if not field:
+        return None
     if field.tag != "240":
         raise ValueError("Invalid MARC tag passed. Only 240 is accepted.")
 
@@ -75,5 +90,10 @@ def modify_uniform_title(number: str, field: Field) -> Field:
         return None
     else:
         pos = determine_subfield_n_position(field)
+        try:
+            if field["l"][-1] == ".":
+                field["l"] = field["l"][:-1]
+        except KeyError:
+            pass
         field.add_subfield("n", f"{number}.", pos)
         return field

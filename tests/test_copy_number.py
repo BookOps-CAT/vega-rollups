@@ -3,6 +3,7 @@ import pytest
 from pymarc import Field, Subfield
 
 from copy_number import (
+    add_custom_load_table_command,
     complex_subfield_n,
     determine_subfield_n_position,
     find_digits,
@@ -14,7 +15,19 @@ from copy_number import (
 )
 
 
-@pytest.mark.parametrize("arg,expectation", [
+def test_add_custom_load_table_command_empty_arg():
+    with pytest.raises(ValueError):
+        add_custom_load_table_command("")
+
+
+def test_add_custom_load_table_command():
+    field = add_custom_load_table_command("ut")
+    assert str(field) == "=949  \\\\$a*recs=ut;"
+
+
+@pytest.mark.parametrize(
+    "arg,expectation",
+    [
         ("1 and 2", True),
         ("Volumne 3, part 1", True),
         ("Volume III, 1930-1935", True),
@@ -28,11 +41,12 @@ from copy_number import (
         ("Book 3.", False),
         ("Vol. 5", False),
         ("Vol. 55 /", False),
-        ("[Vol 45].", False)
-
-    ])
+        ("[Vol 45].", False),
+    ],
+)
 def test_complex_subfield_n(arg, expectation):
     assert complex_subfield_n(arg) == expectation
+
 
 @pytest.mark.parametrize(
     "arg,expectation",
@@ -59,13 +73,16 @@ def test_has_complex_subfields(arg, expectation):
 def test_has_single_subfield_n_missing(stub_245_no_number):
     assert has_single_subfield_n(stub_245_no_number) is False
 
+
 def test_has_single_subfield_n_present(stub_245_with_number):
     assert has_single_subfield_n(stub_245_with_number) is True
+
 
 def test_has_single_subfield_n_multiple(stub_245_with_number):
     stub_245_with_number.subfields.append(Subfield("n", "9"))
     assert len(stub_245_with_number.get_subfields("n")) > 1
     assert has_single_subfield_n(stub_245_with_number) is False
+
 
 @pytest.mark.parametrize(
     "arg,expectation",
@@ -86,6 +103,7 @@ def test_normalize_value(arg, expectation):
 
 def determine_subfield_n_position_if_no_sub_6(stub_240):
     assert determine_subfield_n_position(stub_240) == 1
+
 
 def determine_subfield_n_position_if_sub_6_present(stub_240):
     stub_240.subfields.insert(0, Subfield("6", "spam"))
@@ -115,7 +133,7 @@ def test_get_number_no_subfield(stub_245_no_number):
         ("Volumne 3, part 1", None),
         ("Volume III, 1930-1935", None),
         ("Knigi 1 i 2", None),
-        ("Volumes 1-2-3", None)
+        ("Volumes 1-2-3", None),
     ],
 )
 def test_find_digits(arg, expectation):
@@ -140,9 +158,15 @@ def test_modifify_uniform_title_when_subfield_6_present(stub_240):
     assert str(field) == "=240  10$6bar$aFoo.$n5.$lEnglish"
 
 
+def test_modify_uniform_title_removal_of_terminal_period(stub_240):
+    stub_240["l"] = f"{stub_240['l']}."
+    assert str(stub_240) == "=240  10$aFoo.$lEnglish."
+    field = modify_uniform_title("5", stub_240)
+    assert str(field) == "=240  10$aFoo.$n5.$lEnglish"
+
+
 def test_modify_uniform_title_when_field_is_None():
-    with pytest.raises(AttributeError):
-        assert modify_uniform_title(5, None)
+    assert modify_uniform_title(5, None) is None
 
 
 def test_modify_uniform_title_when_number_is_None(stub_240):

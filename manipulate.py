@@ -1,8 +1,9 @@
-import csv, sys
+import csv
+import sys
 
 from pymarc import MARCReader, Record
 
-from copy_number import get_number, modify_uniform_title
+from copy_number import get_number, modify_uniform_title, add_custom_load_table_command
 
 
 def save2csv(dst_fh, row):
@@ -27,6 +28,22 @@ def save2csv(dst_fh, row):
             pass
 
 
+def keep_fields(record: Record, fields2keep: list[str]) -> None:
+    """
+    Removes all fields from given record except tags passed in fields2keep argument.
+
+    Args:
+        fields2keep:     list of MARC tags
+        record:     `pymarc.Record` instance to be manipulated
+    """
+
+    new_fields = []
+    for field in record:
+        if field.tag in fields2keep:
+            new_fields.append(field)
+    record.fields = new_fields
+
+
 def save2marc(dst: str, record: Record) -> None:
     with open(dst, "ab") as marcfile:
         marcfile.write(record.as_marc())
@@ -39,11 +56,17 @@ def process(src: str, dst: str):
             bibNo = record["907"]["a"][1:].strip()
             t245 = record["245"]
             number = get_number(t245)
-            t240 = record["240"]
+            try:
+                t240 = record["240"]
+            except KeyError:
+                t240 = None
+                print(f"Bib {bibNo} missing the 240 field.")
             new_t240 = modify_uniform_title(number, t240)
+            keep_fields(record, ["008", "245", "907"])
             if new_t240:
-                record.remove_field(t240)
                 record.add_ordered_field(new_t240)
+                load_table_field = add_custom_load_table_command("ut")
+                record.add_ordered_field(load_table_field)
                 save2marc(dst, record)
                 save2csv("processed.csv", [bibNo, str(t245), str(new_t240)])
             else:
