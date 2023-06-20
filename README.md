@@ -21,3 +21,5 @@ The script produces three files:
     + presence of other than $a$n$l subfields in the original 240
     + no digits in $n of the 245 (example: Book two, Volume IX, etc)
     + typos that concatenate words with digits, example: Book2
++ will use a special load table ("ut") that modifies only a selected tag
+    + records used will have only a minimal number of tags: leader, 008 (?), 240, 245, 907, 949 (command line with load table to be used instruction)
